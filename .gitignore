@@ -1,0 +1,12 @@
+# Ignore node_modules
+node_modules
+package-lock.json
+
+# Ignore .env file
+.env
+
+# Ignore local git repository
+.git
+
+# Other
+info.txt
