@@ -1,12 +1,20 @@
-require('dotenv').config();
-const discordToken = process.env.DISCORD_TOKEN;
-
-//This is where you integrate everything, listen for Discord messages, and handle bot logic.
-
-const { Client } = require('discord.js');
+const { initializeVectorStore, indexVectors } = require('./pinecone');
 const { embedWithLangchain } = require('./langchain');
-const { insertVectors } = require('./pinecone');
 const { readDocuments } = require('./utils');
 
-// ... your bot logic
-
+(async function() {
+    const docsPath = path.join(__dirname, '../documents');
+    const documents = readDocuments(docsPath);
+    
+    // Convert documents to vectors
+    const vectors = [];
+    for (let doc of documents) {
+        const vector = await embedWithLangchain(doc);
+        vectors.push(vector);
+    }
+    
+    // Initialize Pinecone store and index vectors
+    const indexName = "YOUR_INDEX_NAME";
+    await initializeVectorStore(indexName);
+    await indexVectors(indexName, vectors);
+})();
