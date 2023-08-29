@@ -14,7 +14,18 @@ async function initializeVectoreStore(indexName) {
     }
 }
 
+async function indexVectors(indexName, vectors) {
+    try {
+        // Assuming Pinecone allows batch insertion. Otherwise, you'd loop and insert individually.
+        await pinecone.insert(indexName, vectors);
+        console.log(`Successfully indexed ${vectors.length} vectors in Pinecone.`);
+    } catch (error) {
+        console.error("Error indexing vectors in Pinecone:", error);
+    }
+}
+
 // Export the functions for use in other files
 module.exports = {
-    initializeVectoreStore
+    initializeVectoreStore,
+    indexVectors
 };
