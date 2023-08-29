@@ -1,0 +1,29 @@
+{
+  "name": "pumpkin",
+  "version": "1.0.0",
+  "description": "discord bot to answer questions",
+  "main": "index.js",
+  "scripts": {
+    "test": "test pumpkin"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alijnmerchant21/Pumpkin.git"
+  },
+  "keywords": [
+    "pumpkin"
+  ],
+  "author": "ali-merchant",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alijnmerchant21/Pumpkin/issues"
+  },
+  "homepage": "https://github.com/alijnmerchant21/Pumpkin#readme",
+  "dependencies": {
+    "@pinecone-database/pinecone": "^0.1.6",
+    "axios": "^1.5.0",
+    "discord.js": "^14.13.0",
+    "dotenv": "^16.3.1",
+    "pinecone-client": "^1.1.0"
+  }
+}
