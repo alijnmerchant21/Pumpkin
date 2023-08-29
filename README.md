@@ -12,9 +12,24 @@ Pumpkin is trained on CometBFT data and can answer questions.
 
 ### Extended
 
-Pumpkin is trained on personal interactions fed directly into the knowledge base. It can also learn and improve its database through sources like - Issues, discussions on GitHub, and other forums. 
+Pumpkin is trained on personal interactions fed directly into the knowledge base. It can also learn and improve its database through sources like - Issues, discussions on GitHub, and other forums.
 
-### Future 
+### Future
 
-The learning model is trained per Cal Newport's method, where each issue/idea is interconnected. 
+The learning model is trained per Cal Newport's method, where each issue/idea is interconnected.
 
+## Project Structure
+
+- src
+  - bot.js
+  - pinecone.js
+  - langchain.js
+  - utils.js
+
+- documents
+
+- package.json
+
+- .env
+
+- README.md
