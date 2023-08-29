@@ -1,7 +1,26 @@
 //This file will handle initializing Pinecone, creating the index, inserting vectors, and any other Pinecone related operations.
 
-const Pinecone = require('pinecone-client');
-const pinecone = new Pinecone(process.env.PINECONE_API_KEY);
+//const Pinecone = require('pinecone-client');
+//const pinecone = new Pinecone(process.env.PINECONE_API_KEY);
+
+const { PineconeClient } = require('@pinecone-database/pinecone');
+
+const pinecone = new PineconeClient();
+
+const PINECONE_ENVIRONMENT = 'us-west4-gcp-free';
+
+(async () => {
+    try {
+        await pinecone.init({
+            apiKey: process.env.PINECONE_API_KEY,
+            environment: PINECONE_ENVIRONMENT,
+        });
+} catch (error) {
+    console.error("Error initializing Pinecone:", error);
+}
+
+})();
+
 
 //Initialize Pinecone Vectore Store 
 async function initializeVectoreStore(indexName) {
@@ -24,8 +43,27 @@ async function indexVectors(indexName, vectors) {
     }
 }
 
+async function searchInPinecone(question) {
+    // Convert question to vector
+    const questionVector = await embedWithLangchain(question);  // Assuming you have this function from langchain.js
+    
+    // Search in Pinecone
+    try {
+        const searchResults = await pinecone.query("pumpkin-index", [questionVector], 3); // Search for top 3 results
+        if (searchResults && searchResults.length > 0) {
+            // Format the result and return. This is a basic way. You can format it as per your requirement.
+            return searchResults[0].text; // Here we're only returning the top result's text
+        }
+        return "Sorry, I couldn't find an answer in the knowledge base.";
+    } catch (error) {
+        console.error("Error searching in Pinecone:", error);
+        return "Sorry, I faced an error searching for the answer.";
+    }
+}
+
 // Export the functions for use in other files
 module.exports = {
     initializeVectoreStore,
-    indexVectors
+    indexVectors,
+    searchInPinecone
 };
