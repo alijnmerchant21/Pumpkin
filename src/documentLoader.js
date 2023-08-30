@@ -13,6 +13,7 @@ export async function loadAllDocuments() {
       ".jsonl": (path) => new JSONLinesLoader(path, "/html"),
       ".txt": (path) => new TextLoader(path),
       ".csv": (path) => new CSVLoader(path, "text"),
+      ".md": (path) => new TextLoader(path),
     }
   );
 
