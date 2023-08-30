@@ -1,0 +1,74 @@
+//This file will be responsible for embedding your texts using Langchain.
+
+/*const axios = require('axios');
+
+async function embedWithLangchain(text) {
+    try {
+        const response = await axios.post(process.env.LANGCHAIN_ENDPOINT, { text: text });
+        return response.data.vector;
+    } catch (error) {
+        console.error("Error embedding text with Langchain:", error); 
+    }
+    
+    
+}
+
+module.exports = {
+    embedWithLangchain
+};*/
+
+import { OPENAI} from "langchain//llms";
+import { LLMChain } from "langchain/chains";
+import { PromptTemplate } from "langchain/prompts";
+
+ PromptTemplate };
+
+const { RetrievalQAChain } = require("langchain/chains");
+const { ChatOpenAI } = require("langchain/chat_models/openai");
+const { PromptTemplate } = require("langchain/prompts");
+
+// Initialize the OpenAI model for Langchain
+const model = new ChatOpenAI({ 
+    modelName: "gpt-3.5-turbo",
+    apiKey: process.env.OPENAI_API_KEY,
+ });
+
+// Assuming you have set up Pinecone in another file
+const { searchInPinecone } = require('./pinecone');
+
+// Simplified call function for Langchain
+async function askLangchain(question) {
+    try {
+        // Use Pinecone for vector retrieval
+        const vectorResult = await searchInPinecone(question); 
+
+        // If no vector is found, you can decide how to handle it, 
+        // e.g., directly query OpenAI without RetrievalQAChain.
+        if(!vectorResult) {
+            // Directly query OpenAI using Langchain 
+            const response = await model.call({ query: question });
+            return response.text;
+        }
+
+        // Use Pinecone's results with RetrievalQAChain
+        const chain = RetrievalQAChain.fromLLM(model, vectorResult);
+        const response = await chain.call({ query: question });
+
+        return response.text;
+
+    } catch (error) {
+        console.error("Error querying Langchain:", error);
+        return "Sorry, I faced an error fetching the answer.";
+    }
+}
+
+module.exports = {
+    askLangchain
+};
+
+// New code from YT
+
+
+export const run = async () => {
+    const model = new OPENAI();
+}
