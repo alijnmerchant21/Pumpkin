@@ -14,6 +14,7 @@ export async function loadAllDocuments() {
       ".txt": (path) => new TextLoader(path),
       ".csv": (path) => new CSVLoader(path, "text"),
       ".md": (path) => new TextLoader(path),
+      ".rst": (path) => new TextLoader(path),
     }
   );
 
