@@ -21,12 +21,17 @@ The learning model is trained per Cal Newport's method, where each issue/idea is
 ## Project Structure
 
 - src
-  - bot.js
-  - pinecone.js
-  - langchain.js
-  - utils.js
+  - chatbot.js
+  - documentLoader.js
+  - textSplitter.js
+  - vectorStore.js
 
-- documents
+- document_loaders
+  - example_data
+    - example
+      - example.txt
+
+- index.js
 
 - package.json
 
