@@ -1,0 +1,4 @@
+- [ ] Add support for GitHub. (GitHub integration to read code directly)
+- [ ] Give source of information.
+- [ ] Ask user for feedback. If correct, store answer as it is. If not, prompt the user to answer the question, or rectify the answer.
+- 
