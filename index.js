@@ -31,7 +31,12 @@ async function main() {
 
             const response = await chat(chatChain, question);
             console.log("Bot:", response);
+
+            if (response.fileName) {
+                console.log("Information sourced from: ", response.fileName);
+            }
         }
+        
     } catch (err) {
         console.error("Error:", err);
     }
