@@ -27,13 +27,23 @@ export async function chat(chain, question) {
   const result = await chain.call({ query: question });
 
   // Attempt to extract the file name from the top of the source document content
-  const fileNameRegex = /\[FileName: (.+?)\]/;
+  const fileNameRegex = /\[FileName:\s*(.+?)\]/;
   const sources = result.sourceDocuments.map(doc => {
     const matches = fileNameRegex.exec(doc.pageContent);
-    return matches && matches[1];
+
+    if (!matches || !matches[1]) {
+       // Enhance Logging for Debugging
+      console.warn("Failed to extract source for document content:", doc.pageContent);
+      return "Unknown Source";
+    }
+    return matches[1];
   }).filter(Boolean);
+
+ 
   
-const responseWithSource = `${result?.text} (Sources: ${sources.join(', ')})`;
+  
+  const combinedSources = sources.join(", ");
+  const responseWithSource = `${result?.text} (Sources: ${combinedSources})`;
 
   return responseWithSource;
 }
