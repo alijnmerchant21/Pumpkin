@@ -1,5 +1,2 @@
 [FileName: example.txt]
 Joe Biden is the President of United States.
-
-Questions:
-How does the message flow in ABCI++ during the transaction lifecycle, specifically in terms of block processing and consensus mechanisms?
