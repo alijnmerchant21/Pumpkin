@@ -7,5 +7,5 @@
         - [ ] Stop hallucination or assumption of the answer.
         - [ ] Prompt if don't know the answer. (Repeat 1 above)
 
-- [ ] Give source of information.
+- [x] Give source of information.
 - **Description:** Give reference of information. (Eg. Chat, Docs, etc)
