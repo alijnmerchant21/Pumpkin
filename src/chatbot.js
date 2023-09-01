@@ -37,7 +37,7 @@ function extractFileName(docContent) {
 }
 
 export async function initChatBot() {
-  const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1500 });
+  const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 2048 });
   const allDocs = [];
   const fileNames = ["src/document_loaders/example_data/example/example.txt", "src/document_loaders/example_data/example/abci/abci++_app_requirements.md", "src/document_loaders/example_data/example/abci/abci++_basic_concepts.md", "src/document_loaders/example_data/example/abci/abci++_client_server.md", "src/document_loaders/example_data/example/abci/abci++_comet_expected_behavior.md", "src/document_loaders/example_data/example/abci/abci++_example_scenarios.md", "src/document_loaders/example_data/example/abci/abci++_methods.md"];
 
@@ -62,16 +62,19 @@ export async function chat(chain, context, question) {
   if (result?.text) {
       if (result?.sourceDocuments && result.sourceDocuments.length > 0) {
           const sources = result.sourceDocuments.map(doc => extractFileName(doc.pageContent)).filter(Boolean);
+
           return {
-              answer: `${result.text}`,
-              source: `Retrieved Documents: ${sources.join(", ")}`
+             answer: `${result.text}`,
+            source: `Retrieved Documents: ${sources.join(", ")}`
           };
       }
+      
       return {
           answer: result.text,
           source: "GPT-3.5 only"
       };
   }
+  
   return {
       answer: "I couldn't find relevant information.",
       source: "GPT-3.5 only"
