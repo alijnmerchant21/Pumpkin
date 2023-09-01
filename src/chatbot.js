@@ -1,20 +1,44 @@
 import dotenv from 'dotenv';
 import { RetrievalQAChain } from "langchain/chains";
-import { BufferMemory } from "langchain/memory";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { PromptTemplate } from "langchain/prompts";
 import { HNSWLib } from "langchain/vectorstores/hnswlib";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import * as fs from "fs";
-import { EntityMemory, ENTITY_MEMORY_CONVERSATION_TEMPLATE } from "langchain/memory";
-
+import { EntityMemory } from "langchain/memory"; // Adjusted the import
+import sqlite3 from 'sqlite3';
 
 dotenv.config();
 
+// SQLite Entity Store
+class SQLiteEntityStore {
+    constructor() {
+        //this.db = new sqlite3.Database(':memory:');
+        this.db = new sqlite3.Database('./pumpkin.db');
+
+        this.db.run("CREATE TABLE IF NOT EXISTS entities (name TEXT, value TEXT)");
+    }
+    
+    set(name, value) {
+        this.db.run("INSERT INTO entities(name, value) VALUES(?, ?)", [name, value]);
+    }
+    
+    get(name) {
+        return new Promise((resolve, reject) => {
+            this.db.get("SELECT value FROM entities WHERE name = ?", [name], (err, row) => {
+                if (err) reject(err);
+                resolve(row ? row.value : null);
+            });
+        });
+    }
+}
+
+const entityStore = new SQLiteEntityStore();
+
 const PROMPT = new PromptTemplate({
   template: `
-Answer the following question using the context from the documents provided. If the context doesn't have the information, use your own knowledge base (GPT-3.5) to answer. (Try as much as possible to answer from your own knowledge). If you still can't answer, then reply with "From my own knowledge: I couldn't find relevant information".
+Answer the following question using the context from the documents provided. If the context doesn't have the information, use your own knowledge base (GPT-3.5) to answer. If you still can't answer, then reply with "From my own knowledge: I couldn't find relevant information".
 
 Remember: Always provide accurate information and do not make up or hallucinate any details.
 
@@ -25,7 +49,6 @@ Answer:
   `,
   inputVariables: ["context", "question"],
 });
-
 
 function extractFileName(docContent) {
     const lines = docContent.split('\n');
@@ -50,15 +73,14 @@ export async function initChatBot() {
   }
 
   const vectorStore = await HNSWLib.fromDocuments(allDocs, new OpenAIEmbeddings());
+
   const memory = new EntityMemory({
     llm: new ChatOpenAI({ modelName: "gpt-3.5-turbo", apiKey: process.env.OPENAI_API_KEY }),
-    chatHistoryKey: "history",
-    entitiesKey: "entities"
+    entityStore: entityStore
   });
   
   const model = new ChatOpenAI({ modelName: "gpt-3.5-turbo", apiKey: process.env.OPENAI_API_KEY });
   const chain = RetrievalQAChain.fromLLM(model, vectorStore.asRetriever(), { returnSourceDocuments: true });
-  
 
   return chain;
 }
@@ -70,7 +92,6 @@ export async function chat(chain, context, question) {
   if (result?.text) {
       if (result?.sourceDocuments && result.sourceDocuments.length > 0) {
           const sources = result.sourceDocuments.map(doc => extractFileName(doc.pageContent)).filter(Boolean);
-
           return {
              answer: `${result.text}`,
             source: `Retrieved Documents: ${sources.join(", ")}`
