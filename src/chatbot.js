@@ -14,7 +14,7 @@ dotenv.config();
 
 const PROMPT = new PromptTemplate({
   template: `
-Answer the following question using the context from the documents provided. If the context doesn't have the information, use your own knowledge base (GPT-3.5) to answer. If you still can't answer, then reply with "From my own knowledge: I couldn't find relevant information".
+Answer the following question using the context from the documents provided. If the context doesn't have the information, use your own knowledge base (GPT-3.5) to answer. (Try as much as possible to answer from your own knowledge). If you still can't answer, then reply with "From my own knowledge: I couldn't find relevant information".
 
 Remember: Always provide accurate information and do not make up or hallucinate any details.
 
@@ -39,7 +39,7 @@ function extractFileName(docContent) {
 }
 
 export async function initChatBot() {
-  const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1024 });
+  const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 2048 });
   const allDocs = [];
   const fileNames = ["src/document_loaders/example_data/example/example.txt", "src/document_loaders/example_data/example/abci/abci++_app_requirements.md", "src/document_loaders/example_data/example/abci/abci++_basic_concepts.md", "src/document_loaders/example_data/example/abci/abci++_client_server.md", "src/document_loaders/example_data/example/abci/abci++_comet_expected_behavior.md", "src/document_loaders/example_data/example/abci/abci++_example_scenarios.md", "src/document_loaders/example_data/example/abci/abci++_methods.md"];
 
@@ -58,12 +58,6 @@ export async function initChatBot() {
   
   const model = new ChatOpenAI({ modelName: "gpt-3.5-turbo", apiKey: process.env.OPENAI_API_KEY });
   const chain = RetrievalQAChain.fromLLM(model, vectorStore.asRetriever(), { returnSourceDocuments: true });
-
-  /*const chain = new LLMChain({
-    llm: model,
-    prompt: ENTITY_MEMORY_CONVERSATION_TEMPLATE,
-    memory
-  });*/
   
 
   return chain;
