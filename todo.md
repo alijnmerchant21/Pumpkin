@@ -7,7 +7,7 @@
   - [ ] Update the knowledge with the correct answer
   - [x] Stop hallucination or assumption of the answer
   - [ ] Prompt if you don't know the answer
-    - [ ] Add memory to the chat
+    - [x] Add memory to the chat
 <br>
 
 - [x] Give the source of information.
