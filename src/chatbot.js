@@ -7,6 +7,8 @@ import { HNSWLib } from "langchain/vectorstores/hnswlib";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import * as fs from "fs";
+import { EntityMemory, ENTITY_MEMORY_CONVERSATION_TEMPLATE } from "langchain/memory";
+
 
 dotenv.config();
 
@@ -37,7 +39,7 @@ function extractFileName(docContent) {
 }
 
 export async function initChatBot() {
-  const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1500 });
+  const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1024 });
   const allDocs = [];
   const fileNames = ["src/document_loaders/example_data/example/example.txt", "src/document_loaders/example_data/example/abci/abci++_app_requirements.md", "src/document_loaders/example_data/example/abci/abci++_basic_concepts.md", "src/document_loaders/example_data/example/abci/abci++_client_server.md", "src/document_loaders/example_data/example/abci/abci++_comet_expected_behavior.md", "src/document_loaders/example_data/example/abci/abci++_example_scenarios.md", "src/document_loaders/example_data/example/abci/abci++_methods.md"];
 
@@ -48,9 +50,21 @@ export async function initChatBot() {
   }
 
   const vectorStore = await HNSWLib.fromDocuments(allDocs, new OpenAIEmbeddings());
-  const memory = new BufferMemory({ returnMessages: true, outputKey: "response" });
+  const memory = new EntityMemory({
+    llm: new ChatOpenAI({ modelName: "gpt-3.5-turbo", apiKey: process.env.OPENAI_API_KEY }),
+    chatHistoryKey: "history",
+    entitiesKey: "entities"
+  });
+  
   const model = new ChatOpenAI({ modelName: "gpt-3.5-turbo", apiKey: process.env.OPENAI_API_KEY });
   const chain = RetrievalQAChain.fromLLM(model, vectorStore.asRetriever(), { returnSourceDocuments: true });
+
+  /*const chain = new LLMChain({
+    llm: model,
+    prompt: ENTITY_MEMORY_CONVERSATION_TEMPLATE,
+    memory
+  });*/
+  
 
   return chain;
 }
@@ -62,16 +76,19 @@ export async function chat(chain, context, question) {
   if (result?.text) {
       if (result?.sourceDocuments && result.sourceDocuments.length > 0) {
           const sources = result.sourceDocuments.map(doc => extractFileName(doc.pageContent)).filter(Boolean);
+
           return {
-              answer: `${result.text}`,
-              source: `Retrieved Documents: ${sources.join(", ")}`
+             answer: `${result.text}`,
+            source: `Retrieved Documents: ${sources.join(", ")}`
           };
       }
+      
       return {
           answer: result.text,
           source: "GPT-3.5 only"
       };
   }
+  
   return {
       answer: "I couldn't find relevant information.",
       source: "GPT-3.5 only"
